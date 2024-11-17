@@ -1,8 +1,15 @@
+# zmodload zsh/zprof
+
 # Personal Zsh configuration file. It is strongly recommended to keep all
 # shell customization and configuration (including exported environment
 # variables such as PATH) in this file or in files sourced from it.
 #
 # Documentation: https://github.com/romkatv/zsh4humans/blob/v5/README.md.
+
+
+################################################################################
+#                                    zstyle                                    #
+################################################################################
 
 # Periodic auto-update on Zsh startup: 'ask' or 'no'.
 # You can manually run `z4h update` to update everything.
@@ -13,8 +20,9 @@ zstyle ':z4h:' auto-update-days '28'
 # Keyboard type: 'mac' or 'pc'.
 zstyle ':z4h:bindkey' keyboard  'mac'
 
-# Don't start tmux.
-zstyle ':z4h:' start-tmux       no
+# Start tmux if not already in tmux.
+# zstyle ':z4h:' start-tmux       command tmux -u new -A -D -t z4h
+# Commented out per https://github.com/romkatv/zsh4humans/blob/master/tips.md#tmux
 
 # Mark up shell's output with semantic information.
 zstyle ':z4h:' term-shell-integration 'yes'
@@ -29,25 +37,28 @@ zstyle ':z4h:fzf-complete' recurse-dirs 'no'
 # Enable direnv to automatically source .envrc files.
 zstyle ':z4h:direnv'         enable 'no'
 # Show "loading" and "unloading" notifications from direnv.
-zstyle ':z4h:direnv:success' notify 'yes'
+zstyle ':z4h:direnv:success' notify 'no'
 
 # Enable ('yes') or disable ('no') automatic teleportation of z4h over
 # SSH when connecting to these hosts.
-zstyle ':z4h:ssh:example-hostname1'   enable 'yes'
-zstyle ':z4h:ssh:*.example-hostname2' enable 'no'
+# zstyle ':z4h:ssh:example-hostname1'   enable 'yes'
+# zstyle ':z4h:ssh:*.example-hostname2' enable 'no'
 # The default value if none of the overrides above match the hostname.
 zstyle ':z4h:ssh:*'                   enable 'no'
 
 # Send these files over to the remote host when connecting over SSH to the
 # enabled hosts.
-zstyle ':z4h:ssh:*' send-extra-files '~/.nanorc' '~/.env.zsh'
+zstyle ':z4h:ssh:*' send-extra-files '~/.viminfo' '~/.env.zsh'
 
-# Clone additional Git repositories from GitHub.
-#
+
+################################################################################
+#                Clone additional Git repositories from GitHub                 #
+################################################################################
+
 # This doesn't do anything apart from cloning the repository and keeping it
 # up-to-date. Cloned files can be used after `z4h init`. This is just an
 # example. If you don't plan to use Oh My Zsh, delete this line.
-z4h install ohmyzsh/ohmyzsh || return
+# z4h install ohmyzsh/ohmyzsh || return
 
 # Install or update core components (fzf, zsh-autosuggestions, etc.) and
 # initialize Zsh. After this point console I/O is unavailable until Zsh
@@ -55,53 +66,56 @@ z4h install ohmyzsh/ohmyzsh || return
 # perform network I/O must be done above. Everything else is best done below.
 z4h init || return
 
-# Extend PATH.
 
-# BEGIN RRRR
-# https://github.com/pyenv/pyenv#basic-github-checkout
-#   This line would normally go in ~/.zprofile but since that doesn't play
-#   nice with z4h, we put it here before the other path manipulations.
-#     ❯ echo "$(pyenv init --path)"
-#     export PATH="/Users/spacecoffin/.pyenv/shims:${PATH}"
-# eval "$(pyenv init --path)" <--- COMMENTED OUT WHILE TRYING OMZ PLUGIN
-
-# From OMZ pyenv plugin:
-#   Found pyenv, but it is badly configured (missing pyenv shims in $PATH).
-#   pyenv might not work correctly for non-interactive shells (for example,
-#   when run from a script).
-#   To fix this message, add these lines to the '.profile' and '.zprofile'
-#   files in your home directory:
-# z4h h8s .zprofile, so we put it here instead.
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init --path)"
-
-# pyenv-virtualenv init
-if which pyenv-virtualenv-init > /dev/null; then eval "$(pyenv virtualenv-init -)"; fi
-
-# Remove prompt changing
-export PYENV_VIRTUALENV_DISABLE_PROMPT=1
-
-# pyenv-virtualenvwrapper
-export WORKON_HOME="$HOME/.pyenv/versions/"
-export VIRTUALENVWRAPPER_SCRIPT="$HOME/.pyenv/shims/virtualenvwrapper_lazy.sh"
-
-
-# TODO: this breaks the z4h ordering. clean up.
 ################################################################################
-#                                     JDK                                      #
+#                                 Extend PATH                                  #
 ################################################################################
 
-export JAVA_11_HOME=$(/usr/libexec/java_home -v11)
+# Hatch managed Pythons
+# HATCH_DATA_DIR=$(yq '.dirs.data' "$(hatch config find)")
+# hatch_py_bin_paths=()
+# py_vers=({12..8})
+# for v in "${~py_vers[@]}"; do
+# 	hatch_py_bin_paths+="$HATCH_DATA_DIR"/pythons/3.$v/python/bin
+# done
+# PYPY_VER='7.3.15'
+# pypy_vers=('2.7' '3.9' '3.10')
+# for v in "${(Oa)pypy_vers[@]}"; do
+# 	hatch_py_bin_paths+=($HATCH_DATA_DIR/pythons/pypy$v/pypy$v-v$PYPY_VER-macos_arm64/bin)
+# done
+# path=($hatch_py_bin_paths $path)
 
-alias java11='export JAVA_HOME=$JAVA_11_HOME'
+# rustup
+z4h source "$HOME/.cargo/env"
 
-# default to Java 11
-java11
+# rbenv
+# eval "$(rbenv init - zsh)"
 
-# END RRRR
+# Google Cloud SDK
+# GCLOUD_SDK_INIT_PATH=$HOMEBREW_PREFIX/share/google-cloud-sdk
+# z4h source "$GCLOUD_SDK_INIT_PATH/path.zsh.inc"
 
-# TODO: Does zsh have an array object? More elegant way to extend PATH?
+DEVCONTAINER_CLI_BIN_PATH=$HOME/Library/Application\ Support/Code/User/globalStorage/ms-vscode-remote.remote-containers/cli-bin
+# 20240806: Python client needs libmysqlclient.23.dylib.
+# mysql-client 9.0.1 includes libmysqlclient.24.dylib.
+MYSQL_CLIENT_BIN_PATH=$HOMEBREW_PREFIX/opt/mysql-client@8.0/bin
+path+=($DEVCONTAINER_CLI_BIN_PATH $MYSQL_CLIENT_BIN_PATH)
+
+fpath=(~/.zfunc $fpath)
+
+
+################################################################################
+#                         Export environment variables                         #
+################################################################################
+
+# default editor
+# https://stackoverflow.com/a/2596835
+export VISUAL=vim
+export EDITOR="$VISUAL"
+
+# gpg
+export GPG_TTY=$TTY
+
 path=(~/bin $path)
 export PATH="$HOME/.cargo/bin:$HOME/Library/Application Support/Coursier/bin:$PATH"
 
@@ -111,29 +125,34 @@ export PATH="$HOME/.cargo/bin:$HOME/Library/Application Support/Coursier/bin:$PA
 # export PATH="/opt/homebrew/opt/coreutils/libexec/gnubin:$PATH"
 
 
-# Export environment variables.
-export GPG_TTY=$TTY
+# Java
+LATEST_JAVA=23
+JAVA_HOME_CMD=/usr/libexec/java_home
+export JAVA_LATEST_HOME=$($JAVA_HOME_CMD -v $LATEST_JAVA)
+export JAVA_17_HOME=$($JAVA_HOME_CMD -v 17)
+export JAVA_11_HOME=$($JAVA_HOME_CMD -v 11)
+export JAVA_8_HOME=$($JAVA_HOME_CMD -v 1.8)
 
-# Source additional local files if they exist.
+# Golang
+export GOPATH=$HOME/.go
+
+
+################################################################################
+#                 Source additional local files if they exist                  #
+################################################################################
+
 z4h source ~/.env.zsh
-
-# BEGIN RRRR
-### pyenv / pyenv-virtualenv ###
-
-# https://github.com/pyenv/pyenv#basic-github-checkout
-# Add pyenv into your shell by running the output of pyenv
-#   init - to enable autocompletion and all subcommands.
-# eval "$(pyenv init -)" <--- COMMENTED OUT WHILE TRYING OMZ PLUGIN
-# END RRRR
+z4h source ~/.zsh/aliases/ohmyzsh-git-aliases
 
 # Use additional Git repositories pulled in with `z4h install`.
-#
-# This is just an example that you should delete. It does nothing useful.
-# z4h source ohmyzsh/ohmyzsh/lib/diagnostics.zsh  # source an individual file
-# z4h load   ohmyzsh/ohmyzsh/plugins/emoji-clock  # load a plugin
-z4h load ohmyzsh/ohmyzsh/plugins/pyenv
+#   `z4h source`` individual files
+#   `z4h load`` plugins
 
-# Define key bindings.
+
+################################################################################
+#                             Define key bindings                              #
+################################################################################
+
 z4h bindkey undo Ctrl+/   Shift+Tab  # undo the last command line change
 z4h bindkey redo Option+/            # redo the last undone command line change
 
@@ -142,44 +161,161 @@ z4h bindkey z4h-cd-forward Shift+Right  # cd into the next directory
 z4h bindkey z4h-cd-up      Shift+Up     # cd into the parent directory
 z4h bindkey z4h-cd-down    Shift+Down   # cd into a child directory
 
-# Autoload functions.
+
+################################################################################
+#                              Autoload functions                              #
+################################################################################
+
 autoload -Uz zmv
 
-# Define functions and completions.
-function md() { [[ $# == 1 ]] && mkdir -p -- "$1" && cd -- "$1" }
-compdef _directories md
+# Make it possible to use completion specifications and functions written for bash.
+# Make sure ~/.zfunc is added to fpath before compinit.
+autoload -Uz bashcompinit
+bashcompinit
 
-# Define named directories: ~w <=> Windows home directory on WSL.
-[[ -z $z4h_win_home ]] || hash -d w=$z4h_win_home
+# zsh-completions
+if type brew &>/dev/null; then
+    FPATH=$HOMEBREW_PREFIX/share/zsh-completions:$FPATH
+fi
 
-# Define aliases.
-alias tree='tree -a -I .git'
+autoload -Uz compinit
+compinit
 
-# BEGIN RRRR
-### Personal conveniences ###
-alias srczsh='exec zsh'  # This is preferred by z4h over 'source $HOME/.zshrc'
+################################################################################
+#                       Define functions and completions                       #
+################################################################################
+
+# function md() { [[ $# == 1 ]] && mkdir -p -- "$1" && cd -- "$1" }
+# compdef _directories md
+
+# LabLite environment snapshot
+function mlss() {
+	local MAMBALAB_SNAPSHOT_DIR="$HOME/.mambalab/lablite-snapshots"
+	local SNAPSHOT_PATH="$MAMBALAB_SNAPSHOT_DIR/lablite_$(date +%y%m%d_%H%M)"
+	local LIST_EXPORT_FILE="$SNAPSHOT_PATH.txt"
+	local ENV_EXPORT_FILE="$SNAPSHOT_PATH.yml"
+	if [[ $CONDA_DEFAULT_ENV = 'lablite' ]]; then
+		mamba list --export > $LIST_EXPORT_FILE &&
+			echo $LIST_EXPORT_FILE
+		conda env export -f $ENV_EXPORT_FILE &&
+			echo $ENV_EXPORT_FILE
+	else
+		echo 'lablite not active'
+	fi
+}
+
+# Generate random integer in range
+function rand() {
+    local lower=$1
+    local upper=$2
+    echo $(( lower + RANDOM % (upper - lower + 1) ))
+}
+
+# Google Cloud SDK completions
+# https://github.com/romkatv/zsh4humans/issues/266#issuecomment-1508192847
+# z4h source "$GCLOUD_SDK_INIT_PATH/completion.zsh.inc"
+
+eval "$(register-python-argcomplete pipx)"  # pipx completions
+
+# https://developer.1password.com/docs/cli/get-started/#shell-completion
+eval "$(op completion zsh)"; compdef _op op
+
+# https://github.com/junegunn/fzf?tab=readme-ov-file#setting-up-shell-integration
+eval "$(fzf --zsh)"
+
+# https://github.com/ajeetdsouza/zoxide?tab=readme-ov-file#installation
+eval "$(zoxide init zsh)"
+
+
+################################################################################
+#                                Define aliases                                #
+################################################################################
+
+alias path='echo -e ${PATH//:/\\n}'  # line separated PATH
+
+# Open configs in Sublime Text
 alias zshrc='subl $HOME/.zshrc'
+alias uvtoml='subl $HOME/.config/uv/uv.toml'
+alias sqlfluff-conf='subl $HOME/.sqlfluff'
+# Jupyter Lab
+alias jlset='subl /Users/rrosenberg/.jupyter/lab/user-settings/@jupyter-lsp/jupyterlab-lsp/plugin.jupyterlab-settings'
+
+# zsh
+alias srczsh='exec zsh'  # This is preferred by z4h over 'source $HOME/.zshrc'
+
+alias aws-sso='aws sso login && zsh $HOME/.cron_scripts/codeartifact-pypi-auth.sh'
+
+# Upgrade brew, uv, pipx, hatch-managed python, gcloud, rust, & z4h
+alias upgrade='brew update \
+&& brew upgrade \
+&& uv self update \
+&& uv tool upgrade --all \
+&& pipx upgrade-all --include-injected \
+&& hatch python update all \
+&& gcloud components update --quiet \
+&& rustup update \
+&& z4h update'
+
+# New CDS Copier
+alias newcds='copier copy --trust "git@github.com:CadentTech/ds-copier-hatch-base.git"'
+
+# Hatch aliases
+alias h='hatch'
+alias hr='hatch run'
 
 # Brew: Show dependencies as a tree.
 alias brew-tree='brew deps --tree --installed'
 
-# eza / ls
-alias l='eza'
-alias ll='eza -lah'
-alias lt='eza --tree'
-# alias ls='ls -lah'
-alias lh='eza -lahr --sort newest'
+# du
+alias duh='du -hd 1 | sort -hr'
 
-# default editor
-# https://stackoverflow.com/a/2596835
-export VISUAL=vim
-export EDITOR="$VISUAL"
+# Java
+alias javalatest="export JAVA_HOME=$JAVA_LATEST_HOME"
+alias java17="export JAVA_HOME=$JAVA_17_HOME"
+alias java11="export JAVA_HOME=$JAVA_11_HOME"
+alias java8="export JAVA_HOME=$JAVA_8_HOME"
+#set default to Java 17
+java17
 
-# END RRRR
+#------------------------#
+#       Shadowing        #
+#------------------------#
+
+alias cd='z'
+alias diff='delta'
+alias ls='lsd'
+
+#------------------------#
+#           ls           #
+#------------------------#
+
+# lsd
+alias l='lsd -lA'
+alias ll='l'
+alias lt='lsd --tree'
+
+# eza
+# alias l='eza'
+# alias ll='eza -lah'
+# alias lt='eza -h --tree'
+# alias lh='eza -lahr --sort newest'
+
+# Define named directories: ~w <=> Windows home directory on WSL.
+# [[ -z $z4h_win_home ]] || hash -d w=$z4h_win_home
+
+# Define aliases.
+# alias tree='tree -a -I .git'
 
 # Add flags to existing aliases.
-alias ls="${aliases[ls]:-ls} -Alah"
+# alias ls="${aliases[ls]:-ls} -Alah"
+
+
+################################################################################
+#                              Set shell options                               #
+################################################################################
 
 # Set shell options: http://zsh.sourceforge.net/Doc/Release/Options.html.
 setopt glob_dots     # no special treatment for file names with a leading dot
 setopt no_auto_menu  # require an extra TAB press to open the completion menu
+
+# zprof
