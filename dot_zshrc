@@ -15,14 +15,10 @@
 # You can manually run `z4h update` to update everything.
 zstyle ':z4h:' auto-update      'ask'
 # Ask whether to auto-update this often; has no effect if auto-update is 'no'.
-zstyle ':z4h:' auto-update-days '28'
+zstyle ':z4h:' auto-update-days 'no'
 
 # Keyboard type: 'mac' or 'pc'.
 zstyle ':z4h:bindkey' keyboard  'mac'
-
-# Start tmux if not already in tmux.
-# zstyle ':z4h:' start-tmux       command tmux -u new -A -D -t z4h
-# Commented out per https://github.com/romkatv/zsh4humans/blob/master/tips.md#tmux
 
 # Mark up shell's output with semantic information.
 zstyle ':z4h:' term-shell-integration 'yes'
@@ -95,11 +91,16 @@ z4h source "$HOME/.cargo/env"
 # GCLOUD_SDK_INIT_PATH=$HOMEBREW_PREFIX/share/google-cloud-sdk
 # z4h source "$GCLOUD_SDK_INIT_PATH/path.zsh.inc"
 
-DEVCONTAINER_CLI_BIN_PATH=$HOME/Library/Application\ Support/Code/User/globalStorage/ms-vscode-remote.remote-containers/cli-bin
+CARGO_BIN_PATH="$HOME/.cargo/bin"
+COURSIER_BIN_PATH="$HOME/Library/Application Support/Coursier/bin"
+DEVCONTAINER_CLI_BIN_PATH="$HOME/Library/Application Support/Code/User/globalStorage/ms-vscode-remote.remote-containers/cli-bin"
 # 20240806: Python client needs libmysqlclient.23.dylib.
 # mysql-client 9.0.1 includes libmysqlclient.24.dylib.
 MYSQL_CLIENT_BIN_PATH=$HOMEBREW_PREFIX/opt/mysql-client@8.0/bin
-path+=($DEVCONTAINER_CLI_BIN_PATH $MYSQL_CLIENT_BIN_PATH)
+path+=($CARGO_BIN_PATH $COURSIER_BIN_PATH $DEVCONTAINER_CLI_BIN_PATH $MYSQL_CLIENT_BIN_PATH)
+
+# causes Brewed coreutils to be seen before pre-installed utils
+# export PATH="/opt/homebrew/opt/coreutils/libexec/gnubin:$PATH"
 
 fpath=(~/.zfunc $fpath)
 
@@ -110,20 +111,11 @@ fpath=(~/.zfunc $fpath)
 
 # default editor
 # https://stackoverflow.com/a/2596835
-export VISUAL=vim
+export VISUAL="code --wait"
 export EDITOR="$VISUAL"
 
 # gpg
 export GPG_TTY=$TTY
-
-path=(~/bin $path)
-export PATH="$HOME/.cargo/bin:$HOME/Library/Application Support/Coursier/bin:$PATH"
-
-# causes Brewed coreutils to be seen before pre-installed utils
-#   N.B. THIS BREAKS PYENV see:
-#   https://github.com/pyenv/pyenv/issues/1768#issuecomment-757435245
-# export PATH="/opt/homebrew/opt/coreutils/libexec/gnubin:$PATH"
-
 
 # Java
 LATEST_JAVA=23
@@ -142,19 +134,19 @@ export GOPATH=$HOME/.go
 ################################################################################
 
 z4h source ~/.env.zsh
-z4h source ~/.zsh/aliases/ohmyzsh-git-aliases
+z4h source ~/.zsh/aliases/ohmyzsh-git-aliases.zsh
 
 # Use additional Git repositories pulled in with `z4h install`.
-#   `z4h source`` individual files
-#   `z4h load`` plugins
+#   `z4h source` individual files
+#   `z4h load` plugins
 
 
 ################################################################################
 #                             Define key bindings                              #
 ################################################################################
 
-z4h bindkey undo Ctrl+/   Shift+Tab  # undo the last command line change
-z4h bindkey redo Option+/            # redo the last undone command line change
+z4h bindkey undo Ctrl+/ Shift+Tab  # undo the last command line change
+z4h bindkey redo Alt+/             # redo the last undone command line change
 
 z4h bindkey z4h-cd-back    Shift+Left   # cd into the previous directory
 z4h bindkey z4h-cd-forward Shift+Right  # cd into the next directory
@@ -180,6 +172,7 @@ fi
 
 autoload -Uz compinit
 compinit
+
 
 ################################################################################
 #                       Define functions and completions                       #
@@ -238,12 +231,10 @@ alias zshrc='subl $HOME/.zshrc'
 alias uvtoml='subl $HOME/.config/uv/uv.toml'
 alias sqlfluff-conf='subl $HOME/.sqlfluff'
 # Jupyter Lab
-alias jlset='subl /Users/rrosenberg/.jupyter/lab/user-settings/@jupyter-lsp/jupyterlab-lsp/plugin.jupyterlab-settings'
+alias jlset='subl $HOME/.jupyter/lab/user-settings/@jupyter-lsp/jupyterlab-lsp/plugin.jupyterlab-settings'
 
 # zsh
 alias srczsh='exec zsh'  # This is preferred by z4h over 'source $HOME/.zshrc'
-
-alias aws-sso='aws sso login && zsh $HOME/.cron_scripts/codeartifact-pypi-auth.sh'
 
 # Upgrade brew, uv, pipx, hatch-managed python, gcloud, rust, & z4h
 alias upgrade='brew update \
@@ -251,13 +242,13 @@ alias upgrade='brew update \
 && uv self update \
 && uv tool upgrade --all \
 && pipx upgrade-all --include-injected \
-&& hatch python update all \
-&& gcloud components update --quiet \
 && rustup update \
 && z4h update'
+# && hatch python update all \
+# && gcloud components update --quiet \
 
 # New CDS Copier
-alias newcds='copier copy --trust "git@github.com:CadentTech/ds-copier-hatch-base.git"'
+alias newcds='copier copy --trust "git@github.com:spacecoffin/copier-hatch.git"'
 
 # Hatch aliases
 alias h='hatch'
@@ -274,8 +265,47 @@ alias javalatest="export JAVA_HOME=$JAVA_LATEST_HOME"
 alias java17="export JAVA_HOME=$JAVA_17_HOME"
 alias java11="export JAVA_HOME=$JAVA_11_HOME"
 alias java8="export JAVA_HOME=$JAVA_8_HOME"
-#set default to Java 17
-java17
+java17  # set default to Java 17
+
+#------------------------#
+#        chezmoi         #
+#------------------------#
+
+# based on https://github.com/mass8326/zsh-chezmoi?tab=readme-ov-file#usage
+# alias c='chezmoi'
+# alias cd
+# Ensure chezmoi is available
+# [[ $+commands[chezmoi] ]] || return 0
+
+# Completion
+# source <(chezmoi completion zsh)
+
+# Status
+alias c="chezmoi"
+alias cdf="chezmoi diff"
+alias cst="chezmoi status"
+alias cdoc="chezmoi doctor"
+
+# Editing source
+alias ca="chezmoi add"
+alias cr="chezmoi re-add"
+alias ce="chezmoi edit"
+alias cea="chezmoi edit --apply"
+alias ccd="chezmoi cd"
+
+# Updating target
+alias cap="chezmoi apply"
+alias cup="chezmoi update"
+alias cug="chezmoi upgrade"
+
+# Standardized $0 handling
+0="${ZERO:-${${0:#$ZSH_ARGZERO}:-${(%):-%N}}}"
+0="${${(M)0:#/*}:-$PWD/$0}"
+
+# Git
+# [[ $+commands[git] ]] || return 0
+# source <(alias | awk -F "='" -f "${0:h}/alias.awk")
+alias cg="chezmoi git --"
 
 #------------------------#
 #       Shadowing        #
@@ -283,7 +313,7 @@ java17
 
 alias cd='z'
 alias diff='delta'
-alias ls='lsd'
+alias ls='lsd -lA'
 
 #------------------------#
 #           ls           #
@@ -295,10 +325,9 @@ alias ll='l'
 alias lt='lsd --tree'
 
 # eza
-# alias l='eza'
-# alias ll='eza -lah'
-# alias lt='eza -h --tree'
-# alias lh='eza -lahr --sort newest'
+alias el='eza -lah'
+alias elt='eza -h --tree'
+alias elh='eza -lahr --sort newest'
 
 # Define named directories: ~w <=> Windows home directory on WSL.
 # [[ -z $z4h_win_home ]] || hash -d w=$z4h_win_home
