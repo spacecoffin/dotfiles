@@ -133,11 +133,10 @@ export GOPATH=$HOME/.go
 #                 Source additional local files if they exist                  #
 ################################################################################
 
-z4h source ~/.env.zsh
-z4h source ~/.zsh/aliases/ohmyzsh-git-aliases.zsh
+z4h source ~/.zsh_aliases/ohmyzsh-git-aliases.zsh
 
 # Use additional Git repositories pulled in with `z4h install`.
-#   `z4h source` individual files
+#   `z4h source` individual files e.g., ~/.env.zsh
 #   `z4h load` plugins
 
 
