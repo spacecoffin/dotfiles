@@ -123,7 +123,7 @@ JAVA_HOME_CMD=/usr/libexec/java_home
 export JAVA_LATEST_HOME=$($JAVA_HOME_CMD -v $LATEST_JAVA)
 export JAVA_17_HOME=$($JAVA_HOME_CMD -v 17)
 export JAVA_11_HOME=$($JAVA_HOME_CMD -v 11)
-export JAVA_8_HOME=$($JAVA_HOME_CMD -v 1.8)
+# export JAVA_8_HOME=$($JAVA_HOME_CMD -v 1.8)
 
 # Golang
 export GOPATH=$HOME/.go
@@ -134,6 +134,9 @@ export GOPATH=$HOME/.go
 ################################################################################
 
 z4h source ~/.zsh_aliases/ohmyzsh-git-aliases.zsh
+
+test -e "${HOME}/.iterm2_shell_integration.zsh" && \
+  z4h source "${HOME}/.iterm2_shell_integration.zsh"
 
 # Use additional Git repositories pulled in with `z4h install`.
 #   `z4h source` individual files e.g., ~/.env.zsh
@@ -263,7 +266,7 @@ alias duh='du -hd 1 | sort -hr'
 alias javalatest="export JAVA_HOME=$JAVA_LATEST_HOME"
 alias java17="export JAVA_HOME=$JAVA_17_HOME"
 alias java11="export JAVA_HOME=$JAVA_11_HOME"
-alias java8="export JAVA_HOME=$JAVA_8_HOME"
+# alias java8="export JAVA_HOME=$JAVA_8_HOME"
 java17  # set default to Java 17
 
 #------------------------#
