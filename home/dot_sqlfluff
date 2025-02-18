@@ -1,0 +1,100 @@
+[sqlfluff]
+# verbose is an integer (0-2) indicating the level of log output
+verbose = 2
+templater = jinja
+exclude_rules = AL07,AM04,CV04,LT12,ST06,ST07
+# Below controls SQLFluff output, see max_line_length for SQL output
+output_line_length = 100
+# Max line length is set by default to be in line with the dbt style guide.
+# https://github.com/dbt-labs/corp/blob/main/dbt_style_guide.md
+# Set to zero or negative to disable checks.
+max_line_length = 100
+# Number of passes to run before admitting defeat
+runaway_limit = 50
+# Ignore linting errors found within sections of code coming directly from
+# templated code (e.g. from within Jinja curly braces. Note that it does not
+# ignore errors from literal code found within template loops.
+ignore_templated_areas = True
+# CPU processes to use while linting.
+# If positive, just implies number of processes.
+# If negative or zero, implies number_of_cpus - specifed_number.
+# e.g. -1 means use all processors but one. 0  means all cpus.
+processes = -1
+large_file_skip_byte_limit = 25000
+
+[sqlfluff:indentation]
+tab_space_size = 2
+
+[sqlfluff:templater]
+unwrap_wrapped_queries = True
+
+[sqlfluff:templater:jinja]
+apply_dbt_builtins = True
+
+[sqlfluff:templater:jinja:context]
+ds_nodash = 20220713
+date_str = 2024-09-04
+date_str_raw = 2024-09-04
+start_date_raw = 2024-09-04
+project_id = cool-dev
+dataset = cool-dataset
+table_name = cool-table
+precision = 3
+maximum_daily_num_devices_per_ip = 10
+maximum_daily_num_requests_per_ip = 1000
+maximum_daily_num_request_per_device = 100
+minimum_latitude_value = 12.34
+maximum_latitude_value = 56.78
+minimum_longitude_value = 12.34
+maximum_longitude_value = 56.78
+exchange_id_not_included = (1, 666)
+gcs_bucket = cool-bucket
+vpn_input = vpn
+datacenter_input = datacenter
+bad_ip_pipeline_table = bad_ip_pipeline_table
+bad_did_pipeline_table = bad_did_pipeline_table
+bad_lat_lon_pipeline_table = bad_lat_lon_pipeline_table
+staging_table = staging_table
+filter_request_logs_to_valid_data_table = filter_request_logs_to_valid_data_table
+ip_cluster_to_centroid = ip_cluster_to_centroid
+load_request_cluster_info_00_table = load_request_cluster_info_00_table
+address_masterlist = address_masterlist
+
+[sqlfluff:templater:placeholder]
+param_style = percent
+# param_regex = \{(?P<param_name>[\w_]+)\}
+
+[sqlfluff:templater:python]
+
+[sqlfluff:templater:python:context]
+adg = 123
+adg_id = 456
+bid = 0.5
+bidder_level = 1
+blut_dt = '2022-10-13 14:16:01'
+id_ = 37
+test = ""
+
+[sqlfluff:rules]
+
+[sqlfluff:rules:capitalisation.keywords]
+capitalisation_policy = upper
+
+[sqlfluff:rules:capitalisation.identifiers]
+# Unquoted identifiers
+extended_capitalisation_policy = consistent
+# Comma separated list of words to ignore for this rule
+ignore_words = adGroup
+
+[sqlfluff:rules:capitalisation.functions]
+extended_capitalisation_policy = upper
+
+[sqlfluff:rules:capitalisation.literals]
+# Null & Boolean Literals
+capitalisation_policy = upper
+
+[sqlfluff:rules:capitalisation.types]
+extended_capitalisation_policy = upper
+
+[sqlfluff:rules:convention.casting_style]
+preferred_type_casting_style = cast
