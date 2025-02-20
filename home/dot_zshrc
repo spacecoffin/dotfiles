@@ -183,20 +183,20 @@ compinit
 # function md() { [[ $# == 1 ]] && mkdir -p -- "$1" && cd -- "$1" }
 # compdef _directories md
 
-# LabLite environment snapshot
-function mlss() {
-	local MAMBALAB_SNAPSHOT_DIR="$HOME/.mambalab/lablite-snapshots"
-	local SNAPSHOT_PATH="$MAMBALAB_SNAPSHOT_DIR/lablite_$(date +%y%m%d_%H%M)"
-	local LIST_EXPORT_FILE="$SNAPSHOT_PATH.txt"
-	local ENV_EXPORT_FILE="$SNAPSHOT_PATH.yml"
-	if [[ $CONDA_DEFAULT_ENV = 'lablite' ]]; then
-		mamba list --export > $LIST_EXPORT_FILE &&
-			echo $LIST_EXPORT_FILE
-		conda env export -f $ENV_EXPORT_FILE &&
-			echo $ENV_EXPORT_FILE
-	else
-		echo 'lablite not active'
-	fi
+function grep_alias() {
+    if [ -z "$1" ]; then
+        echo "USAGE: grep_alias PATTERN"
+        return 1
+    fi
+    alias | rg -i "$1"
+}
+
+function grep_env() {
+    if [ -z "$1" ]; then
+        echo "USAGE: grep_env PATTERN"
+        return 1
+    fi
+    printenv | rg -i "$1"
 }
 
 # Generate random integer in range
@@ -205,6 +205,22 @@ function rand() {
     local upper=$2
     echo $(( lower + RANDOM % (upper - lower + 1) ))
 }
+
+# # LabLite environment snapshot
+# function mlss() {
+# 	local MAMBALAB_SNAPSHOT_DIR="$HOME/.mambalab/lablite-snapshots"
+# 	local SNAPSHOT_PATH="$MAMBALAB_SNAPSHOT_DIR/lablite_$(date +%y%m%d_%H%M)"
+# 	local LIST_EXPORT_FILE="$SNAPSHOT_PATH.txt"
+# 	local ENV_EXPORT_FILE="$SNAPSHOT_PATH.yml"
+# 	if [[ $CONDA_DEFAULT_ENV = 'lablite' ]]; then
+# 		mamba list --export > $LIST_EXPORT_FILE &&
+# 			echo $LIST_EXPORT_FILE
+# 		conda env export -f $ENV_EXPORT_FILE &&
+# 			echo $ENV_EXPORT_FILE
+# 	else
+# 		echo 'lablite not active'
+# 	fi
+# }
 
 # Google Cloud SDK completions
 # https://github.com/romkatv/zsh4humans/issues/266#issuecomment-1508192847
@@ -227,6 +243,10 @@ eval "$(zoxide init zsh)"
 ################################################################################
 
 alias path='echo -e ${PATH//:/\\n}'  # line separated PATH
+
+# Functions defined above
+alias rga='grep_alias'
+alias rge='grep_env'
 
 # Open configs in Sublime Text
 alias zshrc='subl $HOME/.zshrc'
