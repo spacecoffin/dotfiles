@@ -237,6 +237,9 @@ eval "$(fzf --zsh)"
 # https://github.com/ajeetdsouza/zoxide?tab=readme-ov-file#installation
 eval "$(zoxide init zsh)"
 
+# https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-completion.html#cli-command-completion-linux
+complete -C "$HOMEBREW_PREFIX/bin/aws_completer" aws
+
 
 ################################################################################
 #                                Define aliases                                #
