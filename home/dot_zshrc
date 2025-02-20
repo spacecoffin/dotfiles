@@ -226,7 +226,7 @@ function rand() {
 # https://github.com/romkatv/zsh4humans/issues/266#issuecomment-1508192847
 # z4h source "$GCLOUD_SDK_INIT_PATH/completion.zsh.inc"
 
-eval "$(register-python-argcomplete pipx)"  # pipx completions
+# eval "$(register-python-argcomplete pipx)"  # pipx completions
 
 # https://developer.1password.com/docs/cli/get-started/#shell-completion
 eval "$(op completion zsh)"; compdef _op op
@@ -263,14 +263,14 @@ alias upgrade='brew update \
 && brew upgrade \
 && uv self update \
 && uv tool upgrade --all \
-&& pipx upgrade-all --include-injected \
 && rustup update \
 && z4h update'
+# && pipx upgrade-all --include-injected \
 # && hatch python update all \
 # && gcloud components update --quiet \
 
-# New CDS Copier
-alias newcds='copier copy --trust "git@github.com:spacecoffin/copier-hatch.git"'
+# New Copier Hatch
+alias newch='copier copy --trust "git@github.com:spacecoffin/copier-hatch.git"'
 
 # Hatch aliases
 alias h='hatch'
