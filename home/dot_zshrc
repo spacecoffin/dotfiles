@@ -67,29 +67,16 @@ z4h init || return
 #                                 Extend PATH                                  #
 ################################################################################
 
-# Hatch managed Pythons
-# HATCH_DATA_DIR=$(yq '.dirs.data' "$(hatch config find)")
-# hatch_py_bin_paths=()
-# py_vers=({12..8})
-# for v in "${~py_vers[@]}"; do
-# 	hatch_py_bin_paths+="$HATCH_DATA_DIR"/pythons/3.$v/python/bin
-# done
-# PYPY_VER='7.3.15'
-# pypy_vers=('2.7' '3.9' '3.10')
-# for v in "${(Oa)pypy_vers[@]}"; do
-# 	hatch_py_bin_paths+=($HATCH_DATA_DIR/pythons/pypy$v/pypy$v-v$PYPY_VER-macos_arm64/bin)
-# done
-# path=($hatch_py_bin_paths $path)
+# uv installed Python
+UV_PYTHON_DIR=$(uv python dir)
+py_bin_paths=()
+py_vers=($(uv python list --only-installed --output-format=json | dasel --read=json --write=- 'all().key'))
+for py_ver in $py_vers; do
+    py_bin_paths+=("$UV_PYTHON_DIR/$py_ver/bin")
+done
 
 # rustup
 z4h source "$HOME/.cargo/env"
-
-# rbenv
-# eval "$(rbenv init - zsh)"
-
-# Google Cloud SDK
-# GCLOUD_SDK_INIT_PATH=$HOMEBREW_PREFIX/share/google-cloud-sdk
-# z4h source "$GCLOUD_SDK_INIT_PATH/path.zsh.inc"
 
 CARGO_BIN_PATH="$HOME/.cargo/bin"
 COURSIER_BIN_PATH="$HOME/Library/Application Support/Coursier/bin"
@@ -97,7 +84,7 @@ DEVCONTAINER_CLI_BIN_PATH="$HOME/Library/Application Support/Code/User/globalSto
 # 20240806: Python client needs libmysqlclient.23.dylib.
 # mysql-client 9.0.1 includes libmysqlclient.24.dylib.
 MYSQL_CLIENT_BIN_PATH=$HOMEBREW_PREFIX/opt/mysql-client@8.0/bin
-path+=($CARGO_BIN_PATH $COURSIER_BIN_PATH $DEVCONTAINER_CLI_BIN_PATH $MYSQL_CLIENT_BIN_PATH)
+path=($py_bin_paths $path $CARGO_BIN_PATH $COURSIER_BIN_PATH $DEVCONTAINER_CLI_BIN_PATH $MYSQL_CLIENT_BIN_PATH)
 
 # causes Brewed coreutils to be seen before pre-installed utils
 # export PATH="/opt/homebrew/opt/coreutils/libexec/gnubin:$PATH"
