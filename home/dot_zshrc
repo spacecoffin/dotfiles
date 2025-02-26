@@ -269,6 +269,9 @@ alias hr='hatch run'
 # Brew: Show dependencies as a tree.
 alias brew-tree='brew deps --tree --installed'
 
+# Kubernetes / kubectl
+alias k='kubectl'
+
 # du
 alias duh='du -hd 1 | sort -hr'
 
