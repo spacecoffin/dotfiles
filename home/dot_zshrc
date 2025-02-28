@@ -273,6 +273,9 @@ alias hr='hatch run'
 # Brew: Show dependencies as a tree.
 alias brew-tree='brew deps --tree --installed'
 
+# Databricks CLI
+alias db='databricks'
+
 # Kubernetes / kubectl
 alias k='kubectl'
 
