@@ -237,8 +237,9 @@ complete -C "$HOMEBREW_PREFIX/bin/aws_completer" aws
 ################################################################################
 
 alias path='echo -e ${PATH//:/\\n}'  # line separated PATH
+alias fpath='echo -e ${FPATH//:/\\n}'  # line separated FPATH
 
-# Functions defined above
+# Grep functions defined above
 alias rga='grep_alias'
 alias rge='grep_env'
 
@@ -263,8 +264,9 @@ alias upgrade='brew update \
 # && hatch python update all \
 # && gcloud components update --quiet \
 
-# New Copier Hatch
+# New Copier project
 alias newch='copier copy --trust "git@github.com:spacecoffin/copier-hatch.git"'
+alias newcu='copier copy --trust "git@github.com:spacecoffin/copier-uv.git"'
 
 # Hatch aliases
 alias h='hatch'
