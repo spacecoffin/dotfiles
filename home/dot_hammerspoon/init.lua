@@ -44,8 +44,8 @@ function MakePressedFn(dialect, templater, excludeRules)
     end
 end
 
--- Fix BigQuery
-hs.hotkey.bind({ "alt", "cmd", "ctrl", "shift" }, "F", nil, MakePressedFn("bigquery", "jinja"))
+-- "Default" Fix ; currently Databricks Dialect
+hs.hotkey.bind({ "alt", "cmd", "ctrl", "shift" }, "F", nil, MakePressedFn("databricks", "jinja"))
 
 -- Fix MySQL
 hs.hotkey.bind({ "alt", "cmd", "ctrl", "shift" }, "M", nil, MakePressedFn("mysql", "placeholder")) -- "python"))
@@ -53,21 +53,21 @@ hs.hotkey.bind({ "alt", "cmd", "ctrl", "shift" }, "M", nil, MakePressedFn("mysql
 -- Fix SparkSQL
 hs.hotkey.bind({ "alt", "cmd", "ctrl", "shift" }, "S", nil, MakePressedFn("sparksql", "python"))
 
--- Lint Bigquery
-hs.hotkey.bind({ "alt", "cmd", "ctrl", "shift" }, "B", nil, function()
+-- Lint Databricks
+hs.hotkey.bind({ "alt", "cmd", "ctrl", "shift" }, "D", nil, function()
     hs.eventtap.keyStroke({ "cmd" }, "c")
     local output, status = hs.execute([[
         function lnt {
             cd $HOME
             local SQLFILE=$HOME/.hssqlfluff.sql
             pbpaste > $SQLFILE
-            $HOME/.local/bin/sqlfluff lint --dialect bigquery --templater jinja $SQLFILE > $HOME/.hssqlfluff.log
+            $HOME/.local/bin/sqlfluff lint --dialect databricks --templater jinja $SQLFILE > $HOME/.hssqlfluff.log
         }
         lnt
     ]], false)
 end)
 
--- Lint MySQL
+-- Lint SparkSQL
 hs.hotkey.bind({ "alt", "cmd", "ctrl", "shift" }, "N", nil, function()
     hs.eventtap.keyStroke({ "cmd" }, "c")
     local output, status = hs.execute([[
@@ -75,7 +75,7 @@ hs.hotkey.bind({ "alt", "cmd", "ctrl", "shift" }, "N", nil, function()
             cd $HOME
             local SQLFILE=$HOME/.hssqlfluff.sql
             pbpaste > $SQLFILE
-            $HOME/.local/bin/sqlfluff lint --dialect mysql --templater jinja $SQLFILE > $HOME/.hssqlfluff.log
+            $HOME/.local/bin/sqlfluff lint --dialect sparksql --templater jinja $SQLFILE > $HOME/.hssqlfluff.log
         }
         lnt
     ]], false)
