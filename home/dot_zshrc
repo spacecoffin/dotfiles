@@ -82,6 +82,7 @@ CARGO_BIN_PATH="$HOME/.cargo/bin"
 GOPATH="$HOME/.go"
 GOBIN="$GOPATH/bin"
 COURSIER_BIN_PATH="$HOME/Library/Application Support/Coursier/bin"
+KREW_BIN_PATH="${KREW_ROOT:-$HOME/.krew}/bin"
 DEVCONTAINER_CLI_BIN_PATH="$HOME/Library/Application Support/Code/User/globalStorage/ms-vscode-remote.remote-containers/cli-bin"
 # 20240806: Python client needs libmysqlclient.23.dylib.
 # mysql-client 9.0.1 includes libmysqlclient.24.dylib.
@@ -93,6 +94,7 @@ path=(
     $CARGO_BIN_PATH
     $GOBIN
     $COURSIER_BIN_PATH
+    $KREW_BIN_PATH
     $DEVCONTAINER_CLI_BIN_PATH
     $MYSQL_CLIENT_BIN_PATH
 )
@@ -119,7 +121,7 @@ export GPG_TTY="$TTY"
 export GOPATH="$GOPATH"
 
 # Java
-LATEST_JAVA=23
+LATEST_JAVA=24
 JAVA_HOME_CMD=/usr/libexec/java_home
 export JAVA_LATEST_HOME=$($JAVA_HOME_CMD -v $LATEST_JAVA)
 export JAVA_17_HOME=$($JAVA_HOME_CMD -v 17)
@@ -305,6 +307,11 @@ alias java17="export JAVA_HOME=$JAVA_17_HOME"
 alias java11="export JAVA_HOME=$JAVA_11_HOME"
 # alias java8="export JAVA_HOME=$JAVA_8_HOME"
 java17  # set default to Java 17
+
+# Granted / assume
+# https://docs.commonfate.io/granted/internals/shell-alias
+# https://docs.commonfate.io/granted/troubleshooting#manually-configuring-your-shell-profile
+alias assume="source assume"
 
 #------------------------#
 #        chezmoi         #
