@@ -102,7 +102,14 @@ path=(
 # causes Brewed coreutils to be seen before pre-installed utils
 # export PATH="/opt/homebrew/opt/coreutils/libexec/gnubin:$PATH"
 
-fpath=(~/.zfunc $fpath)
+# Granted / assume Completions
+GRANTED_COMPLETION_PATH="$HOME/.granted/zsh_autocomplete"
+fpath=(
+    $GRANTED_COMPLETION_PATH/assume
+    $GRANTED_COMPLETION_PATH/granted
+    $HOME/.zfunc
+    $fpath
+)
 
 
 ################################################################################
