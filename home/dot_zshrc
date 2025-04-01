@@ -116,6 +116,9 @@ fpath=(
 #                         Export environment variables                         #
 ################################################################################
 
+# https://davejansen.com/linux-1password-ssh-git-signing-vscode-dev-containers/
+export SSH_AUTH_SOCK="$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+
 # default editor
 # https://stackoverflow.com/a/2596835
 export VISUAL="code --wait"
