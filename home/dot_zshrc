@@ -291,6 +291,7 @@ alias upgrade='brew update \
 && uv self update \
 && uv tool upgrade --all \
 && rustup update \
+&& "$HOME/.scripts/update_ngc_cli.sh" \
 && z4h update'
 # && pipx upgrade-all --include-injected \
 # && hatch python update all \
