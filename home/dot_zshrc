@@ -152,6 +152,11 @@ test -e "${HOME}/.iterm2_shell_integration.zsh" && \
 test -e "$HOME/.config/op/plugins.sh" && \
   z4h source "$HOME/.config/op/plugins.sh"
 
+# broot
+# https://dystroy.org/broot/install-br/
+test -e "$HOME/.config/op/plugins.sh" && \
+  z4h source "$HOME/.config/broot/launcher/bash/br"
+
 # Use additional Git repositories pulled in with `z4h install`.
 #   `z4h source` individual files e.g., ~/.env.zsh
 #   `z4h load` plugins
@@ -368,7 +373,10 @@ alias cg="chezmoi git --"
 #------------------------#
 
 alias cd='z'
+alias df='duf'
 alias diff='delta'
+alias du='dust'
+alias find='fd'
 alias ls='lsd -lA'
 
 #------------------------#
