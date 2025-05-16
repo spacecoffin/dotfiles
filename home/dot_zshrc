@@ -116,6 +116,10 @@ fpath=(
 #                         Export environment variables                         #
 ################################################################################
 
+# set up localization to support UTF-8
+# https://org.ngc.nvidia.com/setup/installers/cli
+export LC_ALL="en_US.UTF-8"
+
 # https://davejansen.com/linux-1password-ssh-git-signing-vscode-dev-containers/
 export SSH_AUTH_SOCK="$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
 
