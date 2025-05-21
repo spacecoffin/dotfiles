@@ -356,6 +356,7 @@ alias ca="chezmoi add"
 alias cr="chezmoi re-add"
 alias ce="chezmoi edit"
 alias cea="chezmoi edit --apply"
+alias cez="chezmoi edit $HOME/.zshrc"
 alias ccd="chezmoi cd"
 
 # Updating target
@@ -371,6 +372,11 @@ alias cug="chezmoi upgrade"
 # [[ $+commands[git] ]] || return 0
 # source <(alias | awk -F "='" -f "${0:h}/alias.awk")
 alias cg="chezmoi git --"
+alias cga="chezmoi git add --"
+alias cgc="chezmoi git -- commit --gpg-sign --message"
+alias cgp="chezmoi git push --"
+alias cgdf="chezmoi git diff --"
+alias cgst="chezmoi git status --"
 
 #------------------------#
 #       Shadowing        #
