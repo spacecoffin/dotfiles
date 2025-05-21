@@ -312,11 +312,10 @@ alias brew-tree='brew deps --tree --installed'
 alias db='databricks'
 
 # Kubernetes / kubectl
-#  This is a kubectl wrapper encouraged by the Koddi Platform team.
+# This is a kubectl wrapper encouraged by the Koddi Platform team.
 if [[ -f "$HOME/.scripts/kubectl-wrapper/kubectl" ]]; then
-    alias kubectl="$HOME/.scripts/kubectl-wrapper/kubectl"
+    alias k="$HOME/.scripts/kubectl-wrapper/kubectl"
 fi
-alias k='kubectl'
 
 # du
 alias duh='du -hd 1 | sort -hr'
