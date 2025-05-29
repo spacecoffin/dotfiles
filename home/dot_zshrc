@@ -147,19 +147,20 @@ export JAVA_11_HOME=$($JAVA_HOME_CMD -v 11)
 #                 Source additional local files if they exist                  #
 ################################################################################
 
-z4h source ~/.zsh_aliases/ohmyzsh-git-aliases.zsh
+source_files=(
+  # https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/git/git.plugin.zsh
+  "$HOME/.zsh_aliases/ohmyzsh-git-aliases.zsh"
+  # https://iterm2.com/documentation-shell-integration.html
+  "$HOME/.iterm2_shell_integration.zsh"
+  # 1Password CLI
+  "$HOME/.config/op/plugins.sh"
+  # broot: https://dystroy.org/broot/install-br/
+  "$HOME/.config/broot/launcher/bash/br"
+)
 
-test -e "${HOME}/.iterm2_shell_integration.zsh" && \
-  z4h source "${HOME}/.iterm2_shell_integration.zsh"
-
-# 1Password CLI
-test -e "$HOME/.config/op/plugins.sh" && \
-  z4h source "$HOME/.config/op/plugins.sh"
-
-# broot
-# https://dystroy.org/broot/install-br/
-test -e "$HOME/.config/op/plugins.sh" && \
-  z4h source "$HOME/.config/broot/launcher/bash/br"
+for source_file in $source_files; do
+  [[ -f $source_file ]] && z4h source "$source_file"
+done
 
 # Use additional Git repositories pulled in with `z4h install`.
 #   `z4h source` individual files e.g., ~/.env.zsh
