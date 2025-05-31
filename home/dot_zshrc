@@ -207,6 +207,50 @@ compinit
 # function md() { [[ $# == 1 ]] && mkdir -p -- "$1" && cd -- "$1" }
 # compdef _directories md
 
+# Upgrade brew, uv, pipx, hatch-managed python, gcloud, rust, & z4h
+function upgrade() {
+  # Homebrew
+  if command -v brew &>/dev/null; then
+    brew update && brew upgrade
+  fi
+
+  # uv
+  if command -v uv &>/dev/null; then
+    uv self update
+    uv tool upgrade --all
+  fi
+
+  # pipx
+  if command -v pipx &>/dev/null; then
+    pipx upgrade-all --include-injected
+  fi
+
+  # hatch
+  if command -v hatch &>/dev/null; then
+    hatch python update all
+  fi
+
+  # gcloud
+  if command -v gcloud &>/dev/null; then
+    gcloud components update --quiet
+  fi
+
+  # rustup
+  if command -v rustup &>/dev/null; then
+    rustup update
+  fi
+
+  # NGC CLI update script
+  if [[ -x "$HOME/.scripts/update_ngc_cli.sh" ]]; then
+    "$HOME/.scripts/update_ngc_cli.sh"
+  fi
+
+  # z4h
+  if command -v z4h &>/dev/null; then
+    z4h update
+  fi
+}
+
 function grep_alias() {
   if [ -z "$1" ]; then
     echo "USAGE: grep_alias PATTERN"
@@ -285,18 +329,6 @@ alias jlset='subl $HOME/.jupyter/lab/user-settings/@jupyter-lsp/jupyterlab-lsp/p
 
 # zsh
 alias srczsh='exec zsh'  # This is preferred by z4h over 'source $HOME/.zshrc'
-
-# Upgrade brew, uv, pipx, hatch-managed python, gcloud, rust, & z4h
-alias upgrade='brew update \
-&& brew upgrade \
-&& uv self update \
-&& uv tool upgrade --all \
-&& rustup update \
-&& "$HOME/.scripts/update_ngc_cli.sh" \
-&& z4h update'
-# && pipx upgrade-all --include-injected \
-# && hatch python update all \
-# && gcloud components update --quiet \
 
 # New Copier project
 alias newch='copier copy --trust "git@github.com:spacecoffin/copier-hatch.git"'
