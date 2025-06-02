@@ -1,0 +1,357 @@
+#!/bin/bash
+
+SCRIPT_DIR=$(dirname $0)
+
+#
+#   Put any functions in functions.bash
+#
+source $SCRIPT_DIR/functions.bash
+
+if [[ $@ == *"__complete"* ]]; then
+
+    if [[ ${@: -1} == "" ]]; then
+        /usr/bin/env kubectl $@ ""
+    else
+        /usr/bin/env kubectl $@
+    fi
+
+    exit 0
+fi
+
+#
+#   For the future:
+#
+#       If editing, don't run through confirm, just confirm context & namespace are passed in.
+#
+#       Maybe have the scripts force users to type in the context or something like that instead of 'yes' / 'no' in some cases?
+#
+#       Is there something we can do on the cluster to prevent kubectl binary being run directly?
+#           Might be able to do this with an RBAC setting, but would require some testing
+#           https://kubernetes.io/docs/reference/access-authn-authz/rbac/  Trying to not have to
+#           require anything extra on the cluster for something like this.
+#
+#       When running destructive options, and we get the RO & RW access to clusters setup, put a check in here to ensure
+#           They have the elevated permissions to run the command?  Exit if they don't.  Or maybe we could have the script do the
+#           elevation for them? Just an idea.  I think I might prefer them having to elevate themselves.
+#
+
+ERROR_MESSAGE=""
+ENTIRE_COMMAND=""
+LIST_OF_FILES=""
+DASH_F_PASSED_IN=0
+OPTION_IS_DESTRUCTIVE=0
+DASH_O_PASSED_IN_NOT_WIDE=0
+
+DESTRUCTIVE_OPTIONS="create,expose,run,set,edit,delete,rollout,scale,autoscale,certificate,cordon,uncordon,drain,taint,attach,exec,port-forward,cp,debug,apply,patch,replace,kustomize,label,annotate"
+OPTIONS_DONT_NEED_CONTEXT_OR_NS="log,logs,get,describe,completion,version,config,options,events"
+
+#
+#   Exit if confirm plugin is not installed
+#
+CHECK_FOR_REQUIRED_PLUGINS
+
+#
+#   Right now we only require context & namespace to be passed in for most commands
+#
+while [[ $# -gt 0 ]]; do
+    case $1 in
+    --all-namespaces | -A)
+        NAMESPACE="ALLNAMESPACES"
+        shift
+        ;;
+    --context)
+        CONTEXT=$2
+        shift
+        shift
+        ;;
+    --context=*)
+        CONTEXT="${1#*=}"
+        shift
+        ;;
+    --namespace | -n)
+        NAMESPACE=$2
+        shift
+        shift
+        ;;
+    --namespace=* | -n=*)
+        NAMESPACE="${1#*=}"
+        shift
+        ;;
+    --filename=* | -f=*)
+        LIST_OF_FILES="$LIST_OF_FILES ${1#*=}"
+        ENTIRE_COMMAND="$ENTIRE_COMMAND ${1#*=}"
+        DASH_F_PASSED_IN=1
+        shift
+        ;;
+    --filename | -f)
+        LIST_OF_FILES="$LIST_OF_FILES $2"
+        ENTIRE_COMMAND="$ENTIRE_COMMAND $1"
+        DASH_F_PASSED_IN=1
+        shift
+        ;;
+    --output=* | -o=*)
+        ENTIRE_COMMAND="$ENTIRE_COMMAND $1"
+
+        if [[ $1 != *"wide"* ]]; then
+            DASH_O_PASSED_IN_NOT_WIDE=1
+        fi
+
+        shift
+        ;;
+    --output | -o)
+        ENTIRE_COMMAND="$ENTIRE_COMMAND $1"
+
+        if [[ $1 != *"wide"* ]]; then
+            DASH_O_PASSED_IN_NOT_WIDE=1
+        fi
+
+        shift
+        ;;
+    *)
+        if [[ $1 =~ \ |\' ]]; then
+            ENTIRE_COMMAND="$ENTIRE_COMMAND '$1'"
+        else
+            ENTIRE_COMMAND="$ENTIRE_COMMAND $1"
+        fi
+
+        shift
+        ;;
+    esac
+done
+
+#echo $ENTIRE_COMMAND
+#ENTIRE_COMMAND=${ENTIRE_COMMAND:1}
+
+if [[ -z "$CONTEXT" && $(kubectl config current-context) == "minikube" ]]; then
+    eval kubectl $ENTIRE_COMMAND
+    exit $?
+fi
+if [[ $CONTEXT == "minikube" ]]; then
+    eval kubectl $ENTIRE_COMMAND
+    exit $?
+fi
+
+SCREEN_MESSAGE "\n\tYou are running the wrapper script. If you don't see this, you messed up.\n" $DASH_O_PASSED_IN_NOT_WIDE
+
+#
+#   Force setting namespace & context on the command line for most commands
+#
+#   There are a specific set of commands where we don't need context or namespace:
+#       kubectl completion
+#       kubectl version
+#       kubectl config
+#       OPTIONS_DONT_NEED_CONTEXT_OR_NS
+#
+#   Options where we need context but not namespace:
+#       kubectl create ns
+#
+
+SPECIFIC_OPTION=$(echo $ENTIRE_COMMAND | awk '{print $1}')
+
+if [ -z "$NAMESPACE" ]; then
+    if
+        [[ $ENTIRE_COMMAND == *"get"* ]] ||
+            [[ $ENTIRE_COMMAND == *"describe"* ]] ||
+            [[ $ENTIRE_COMMAND == *"delete ns"* ]] ||
+            [[ $ENTIRE_COMMAND == *"delete namespace"* ]] ||
+            [[ $ENTIRE_COMMAND == *"create ns"* ]] ||
+            [[ $ENTIRE_COMMAND == *"config"* ]] ||
+            [[ $ENTIRE_COMMAND == *"create ns"* ]] ||
+            [[ $ENTIRE_COMMAND == *"version"* ]] ||
+            [[ $ENTIRE_COMMAND == *"completion"* ]] ||
+            [[ $ENTIRE_COMMAND == *"options"* ]] ||
+            [[ $ENTIRE_COMMAND == *"events"* ]] ||
+            [[ $ENTIRE_COMMAND == *"create namespace"* ]] ||
+            [[ $ENTIRE_COMMAND == *"cordon"* ]] ||
+            [[ $ENTIRE_COMMAND == *"drain"* ]]
+    then
+        NAMESPACE="CANBEEMPTY"
+    else
+        ERROR_MESSAGE="$ERROR_MESSAGE\n\tNamespace is required for 'kubectl $SPECIFIC_OPTION'. Please provide a namespace with --namespace or -n"
+    fi
+fi
+
+#
+#   We don't REQUIRE context or namespace for all commands, but we still want to accept them :)
+#
+if exists_in_list "$OPTIONS_DONT_NEED_CONTEXT_OR_NS" "," $SPECIFIC_OPTION; then
+    if [[ $NAMESPACE == "CANBEEMPTY" ]]; then
+        ENTIRE_COMMAND="$ENTIRE_COMMAND" # No context or namespace needed
+    elif [[ $NAMESPACE == "ALLNAMESPACES" ]]; then
+        ENTIRE_COMMAND="$ENTIRE_COMMAND --all-namespaces"
+    else
+        ENTIRE_COMMAND="$ENTIRE_COMMAND --namespace $NAMESPACE"
+    fi
+
+    if [ ! -z "$CONTEXT" ]; then
+        ENTIRE_COMMAND="$ENTIRE_COMMAND --context $CONTEXT"
+    fi
+
+    #echo $ENTIRE_COMMAND
+
+    eval kubectl $ENTIRE_COMMAND
+
+    exit $?
+fi
+
+if [ -z "$CONTEXT" ]; then
+    ERROR_MESSAGE="$ERROR_MESSAGE\n\tContext is required for 'kubectl $SPECIFIC_OPTION'. Please provide a context with --context"
+fi
+
+if [ ! -z "$ERROR_MESSAGE" ]; then
+    echo -e "\n${FAIL}ERRORS:$ERROR_MESSAGE${ENDC}\n\nExiting...\n"
+    exit 1
+fi
+
+#
+#   Get the CLUSTER_NAME from the context
+#
+CLUSTER_NAME=$(kubectl config get-contexts $CONTEXT | grep -v NAME | awk '{print $3}')
+
+if [[ $CLUSTER_NAME == *"prod"* ]]; then
+    SCREEN_MESSAGE "${WARNING}=========== WARNING WARNING ==============\nYou are running a command on a production cluster. Please be careful.${ENDC}\n" $DASH_O_PASSED_IN_NOT_WIDE
+fi
+
+if exists_in_list "$DESTRUCTIVE_OPTIONS" "," $SPECIFIC_OPTION; then
+    echo -e "${WARNING}$SPECIFIC_OPTION is a destructive option, doing special things\n${END}"
+    OPTION_IS_DESTRUCTIVE=1
+fi
+
+#
+#   Aerospike check(s) here
+#
+#       This flow is not what's actually coded currently
+#
+#       If -f <yaml file> is passed in, we need to check if that file is in the aerospike-operator
+#       Let's make this more than just checking for aerospike.
+#
+#       if !dev & -f passed in:
+#           for each file in the list:
+#               If ANY of the files do not exist / can't be found / is not a file:
+#                   exit with error "file does not exist"
+#               If file not in a repo:
+#                   exit with error "file not in a repo, please only apply yaml files that exit in git"
+#               If file in a repo:
+#                   If in aerospike-operator repo:
+#                       if branch != cluster:
+#                           exit with error "branch does not match cluster, please checkout the correct branch"
+#                       elsif git status != clean:
+#                           exit with error "you have uncommitted changes, please commit or stash them"
+#                       else:
+#                           We good, run the command
+#                   else:
+#                       if git status != clean:
+#                           exit with error "you have uncommitted changes, please commit or stash them"
+#                       else:
+#                           We good, run the command
+#
+
+FILE_ERROR_MESSAGE=""
+
+if [[ $CLUSTER_NAME != *"dev"* ]] && [[ $DASH_F_PASSED_IN -eq 1 ]]; then
+    echo "${WARNING}NOT ON A DEV CLUSTER!${ENDC}"
+    echo "Files passed in: $LIST_OF_FILES"
+
+    #
+    #   Check if all files exist
+    #
+    for YAML_FILE in $LIST_OF_FILES; do
+        if [ ! -f $YAML_FILE ]; then
+            FILE_ERROR_MESSAGE="$FILE_ERROR_MESSAGE\n\tFile $YAML_FILE does not exist"
+        fi
+    done
+
+    if [ ! -z "$FILE_ERROR_MESSAGE" ]; then
+        echo -e "\n${FAIL}ERRORS:$FILE_ERROR_MESSAGE\n\nExiting...${ENDC}\n"
+        exit 1
+    fi
+
+    #
+    #   Check if the files are in a clean repo on the local filesystem
+    #       Exit with error if 1 or more are not
+    #
+    for YAML_FILE in $LIST_OF_FILES; do
+        DIR=$(dirname $(realpath $YAML_FILE))
+
+        git -C $DIR rev-parse 2>/dev/null 1>/dev/null
+
+        if [ $? -ne 0 ]; then
+            FILE_ERROR_MESSAGE="$FILE_ERROR_MESSAGE\n\tFile $YAML_FILE is not in a git repo"
+        else
+            # The file is in a git repo, let's check to see if the repo is clean (ie, no commits pending, no modified files, no pushes pending, etc.)
+
+            if [ $(git -C $DIR status --porcelain | wc -l) -ne 0 ]; then
+                FILE_ERROR_MESSAGE="$FILE_ERROR_MESSAGE\n\tFile $YAML_FILE is in a local repo ($DIR) that has uncommitted changes"
+            fi
+
+            BRANCH=$(git -C $DIR rev-parse --abbrev-ref HEAD)
+
+            echo $DIR
+            if [ $(git -C $DIR diff --stat --cached origin/$BRANCH | wc -l) -ne 0 ]; then
+                FILE_ERROR_MESSAGE="$FILE_ERROR_MESSAGE\n\tFile $YAML_FILE is in a local repo ($DIR) that has committed, but unpushed changes"
+            fi
+        fi
+    done
+
+    #
+    #   OK, if we get here, we assume the files exist and are in clean git repo(s)
+    #       Now, Do the aerospike checks:
+    #           If in aerospike-operator repo:
+    #               if branch != cluster:
+    #                   exit with error "branch does not match cluster, please checkout the correct branch"
+    #
+    for YAML_FILE in $LIST_OF_FILES; do
+        DIR=$(dirname $(realpath $YAML_FILE))
+
+        git -C $DIR config --get remote.origin.url | grep -i "aerospike-operator" 2>/dev/null 1>/dev/null
+
+        if [ $? -ne 0 ]; then
+            FILE_ERROR_MESSAGE="$FILE_ERROR_MESSAGE\n\tFile $YAML_FILE is not in the aerospike-operator repo, exiting!"
+        else
+            echo -e "${WARNING}File $YAML_FILE is in the aerospike-operator repo, continuing!${ENDC}"
+
+            BRANCH=$(git -C $DIR rev-parse --abbrev-ref HEAD)
+
+            if [ $BRANCH != $CLUSTER_NAME ]; then
+                FILE_ERROR_MESSAGE="$FILE_ERROR_MESSAGE\n\tBranch $BRANCH does not match cluster $CLUSTER_NAME, please checkout the correct branch"
+            fi
+        fi
+    done
+
+    if [ ! -z "$FILE_ERROR_MESSAGE" ]; then
+        echo -e "\n${FAIL}ERRORS:$FILE_ERROR_MESSAGE\n\nExiting...${ENDC}\n"
+        exit 1
+    fi
+fi
+
+if [ $OPTION_IS_DESTRUCTIVE -eq 1 ]; then
+    if [[ $NAMESPACE == "ALLNAMESPACES" ]]; then
+        echo -e "\n${FAIL}ERROR: You're attempting to run a destructive command in all namespaces. That's gonna be a no from me, dawg.\n${ENDC}\n"
+        exit 1
+    fi
+
+    if [[ $CLUSTER_NAME != *"dev"* ]]; then
+        CHECK_CLOUDWATCH_ACCESS
+    fi
+
+    echo -e "${WARNING}Option is destructive, so we're gonna run with the confirm plugin, and log the command & diff to cloudwatch\n${ENDC}"
+
+    if [[ $NAMESPACE == "CANBEEMPTY" ]]; then
+        CONFIRM_OUTPUT=$(kubectl confirm --context $CONTEXT $ENTIRE_COMMAND 2>&1 | tee /dev/tty)
+    else
+        CONFIRM_OUTPUT=$(kubectl confirm --context $CONTEXT --namespace $NAMESPACE $ENTIRE_COMMAND 2>&1 | tee /dev/tty)
+    fi
+
+    LOG $CLUSTER_NAME $CONTEXT $NAMESPACE $(echo $ENTIRE_COMMAND | base64) $(echo $CONFIRM_OUTPUT | base64)
+else
+    SCREEN_MESSAGE "\n\t${WARNING}Option is not destructive so not gonna run with confirm.${ENDC}\n" $DASH_O_PASSED_IN_NOT_WIDE
+
+    if [[ $NAMESPACE == "CANBEEMPTY" ]]; then
+        eval kubectl $ENTIRE_COMMAND --context $CONTEXT
+    elif [[ $NAMESPACE == "ALLNAMESPACES" ]]; then
+        eval kubectl --context $CONTEXT --all-namespaces $ENTIRE_COMMAND
+    else
+        eval kubectl --context $CONTEXT --namespace $NAMESPACE $ENTIRE_COMMAND
+    fi
+fi
+exit $?
