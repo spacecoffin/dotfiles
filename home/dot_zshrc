@@ -104,6 +104,7 @@ path=(
 
 # Granted / assume Completions
 GRANTED_COMPLETION_PATH="$HOME/.granted/zsh_autocomplete"
+
 fpath=(
   $GRANTED_COMPLETION_PATH/assume
   $GRANTED_COMPLETION_PATH/granted
@@ -135,12 +136,10 @@ export GPG_TTY="$TTY"
 export GOPATH="$GOPATH"
 
 # Java
-LATEST_JAVA=24
 JAVA_HOME_CMD=/usr/libexec/java_home
-export JAVA_LATEST_HOME=$($JAVA_HOME_CMD -v $LATEST_JAVA)
+export JAVA_LATEST_HOME=$($JAVA_HOME_CMD)
 export JAVA_17_HOME=$($JAVA_HOME_CMD -v 17)
 export JAVA_11_HOME=$($JAVA_HOME_CMD -v 11)
-# export JAVA_8_HOME=$($JAVA_HOME_CMD -v 1.8)
 
 
 ################################################################################
@@ -204,48 +203,43 @@ compinit
 #                       Define functions and completions                       #
 ################################################################################
 
+SCRIPTS_DIR="$HOME/.scripts"
+
 # function md() { [[ $# == 1 ]] && mkdir -p -- "$1" && cd -- "$1" }
 # compdef _directories md
 
 # Upgrade brew, uv, pipx, hatch-managed python, gcloud, rust, & z4h
 function upgrade() {
-  # Homebrew
   if command -v brew &>/dev/null; then
     brew update && brew upgrade
   fi
 
-  # uv
   if command -v uv &>/dev/null; then
     uv self update
+    "$SCRIPTS_DIR/update_uv_python.zsh"
     uv tool upgrade --all
   fi
 
-  # pipx
   if command -v pipx &>/dev/null; then
     pipx upgrade-all --include-injected
   fi
 
-  # hatch
   if command -v hatch &>/dev/null; then
     hatch python update all
   fi
 
-  # gcloud
   if command -v gcloud &>/dev/null; then
     gcloud components update --quiet
   fi
 
-  # rustup
   if command -v rustup &>/dev/null; then
     rustup update
   fi
 
-  # NGC CLI update script
   if [[ -x "$HOME/.scripts/update_ngc_cli.sh" ]]; then
-    "$HOME/.scripts/update_ngc_cli.sh"
+    "$SCRIPTS_DIR/update_ngc_cli.sh"
   fi
 
-  # z4h
   if command -v z4h &>/dev/null; then
     z4h update
   fi
@@ -357,7 +351,6 @@ alias duh='du -hd 1 | sort -hr'
 alias javalatest="export JAVA_HOME=$JAVA_LATEST_HOME"
 alias java17="export JAVA_HOME=$JAVA_17_HOME"
 alias java11="export JAVA_HOME=$JAVA_11_HOME"
-# alias java8="export JAVA_HOME=$JAVA_8_HOME"
 java17  # set default to Java 17
 
 # Granted / assume
@@ -370,8 +363,7 @@ alias assume="source assume"
 #------------------------#
 
 # based on https://github.com/mass8326/zsh-chezmoi?tab=readme-ov-file#usage
-# alias c='chezmoi'
-# alias cd
+
 # Ensure chezmoi is available
 # [[ $+commands[chezmoi] ]] || return 0
 
