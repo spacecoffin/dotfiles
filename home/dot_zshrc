@@ -236,8 +236,12 @@ function upgrade() {
     rustup update
   fi
 
-  if [[ -x "$HOME/.scripts/update_ngc_cli.sh" ]]; then
+  if [[ -x "$SCRIPTS_DIR/update_ngc_cli.sh" ]]; then
     "$SCRIPTS_DIR/update_ngc_cli.sh"
+  fi
+
+  if [[ -x "$SCRIPTS_DIR/update_zsh_completions.sh" ]]; then
+    "$SCRIPTS_DIR/update_zsh_completions.sh"
   fi
 
   if command -v z4h &>/dev/null; then
