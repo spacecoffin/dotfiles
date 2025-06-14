@@ -16,10 +16,10 @@ if ! command -v dasel >/dev/null 2>&1; then
 fi
 
 # Get current version from JSON
-current_version=$(ngc version info --format_type json | awk 'BEGIN{found=0} /^\s*{/ {found=1} found' | dasel -r json '.versionId' | tr -d '"')
+current_version=$(ngc --version | sed 's/NGC CLI //')
 
 # Get latest version from version list
-latest_version=$(ngc version list --format_type json | dasel -r json '.[0].versionId' | tr -d '"')
+latest_version=$(ngc version info --format_type json | awk 'BEGIN{found=0} /^\s*{/ {found=1} found' | dasel -r json '.versionId' | tr -d '"')
 
 # Compare and decide
 if [ "$current_version" = "$latest_version" ]; then
