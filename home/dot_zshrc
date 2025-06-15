@@ -106,6 +106,7 @@ path=(
 GRANTED_COMPLETION_PATH="$HOME/.granted/zsh_autocomplete"
 
 fpath=(
+  $HOMEBREW_PREFIX/share/zsh-completions
   $GRANTED_COMPLETION_PATH/assume
   $GRANTED_COMPLETION_PATH/granted
   $HOME/.zfunc
@@ -184,11 +185,6 @@ z4h bindkey z4h-cd-down    Shift+Down   # cd into a child directory
 ################################################################################
 
 autoload -Uz zmv
-
-# zsh-completions
-if type brew &>/dev/null; then
-  FPATH=$HOMEBREW_PREFIX/share/zsh-completions:$FPATH
-fi
 
 
 ################################################################################
