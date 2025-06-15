@@ -428,13 +428,17 @@ alias elh='eza -lahr --sort newest'
 #                              Load completions                                #
 ################################################################################
 
-# Make it possible to use completion specifications and functions written for bash.
 # Make sure ~/.zfunc is added to fpath before compinit.
+# `-u` option allows running compinit on insecure directories.
+#   Because this rcfile is designed to be run on my personal machines,
+#   this poses a low security risk.
+
+# Make it possible to use completion specifications and functions written for bash.
 autoload -Uz bashcompinit
-bashcompinit
+bashcompinit -u
 
 autoload -Uz compinit
-compinit
+compinit -u
 
 
 ################################################################################
