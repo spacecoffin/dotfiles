@@ -311,8 +311,8 @@ complete -C "$HOMEBREW_PREFIX/bin/aws_completer" aws
 #                                Define aliases                                #
 ################################################################################
 
-alias path='echo -e ${PATH//:/\\n}'  # line separated PATH
-alias fpath='echo -e ${FPATH//:/\\n}'  # line separated FPATH
+alias ppath='echo -e ${PATH//:/\\n}'  # line separated PATH
+alias pfpath='echo -e ${FPATH//:/\\n}'  # line separated FPATH
 
 # Grep functions defined above
 alias rga='grep_alias'
