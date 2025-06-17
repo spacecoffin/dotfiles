@@ -184,6 +184,13 @@ z4h bindkey z4h-cd-down    Shift+Down   # cd into a child directory
 #                              Autoload functions                              #
 ################################################################################
 
+list_on_cd() {
+  lsd -lA
+}
+
+autoload -U add-zsh-hook
+add-zsh-hook chpwd list_on_cd
+
 autoload -Uz zmv
 
 
