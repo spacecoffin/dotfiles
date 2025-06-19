@@ -231,6 +231,11 @@ function upgrade() {
     rustup update
   fi
 
+  if command -v kubectl-krew &>/dev/null; then
+    kubectl krew update
+    kubectl krew upgrade
+  fi
+
   if [[ -x "$SCRIPTS_DIR/update_ngc_cli.sh" ]]; then
     "$SCRIPTS_DIR/update_ngc_cli.sh"
   fi
