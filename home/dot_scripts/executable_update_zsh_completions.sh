@@ -5,6 +5,7 @@ COMPLETION_DIR="$HOME/.zfunc"
 GLOBAL_BIN=/usr/local
 HOMEBREW_BIN=/opt/homebrew/bin
 LOCAL_BIN="$HOME/.local/bin"
+GOLANG_BIN="$HOME/.go/bin"
 # CARGO_BIN="$HOME/.cargo/bin"
 
 # https://docs.astral.sh/uv/getting-started/installation/#shell-autocompletion
@@ -23,4 +24,4 @@ LOCAL_BIN="$HOME/.local/bin"
 _HATCH_COMPLETE=zsh_source "$GLOBAL_BIN/hatch/bin/hatch" > "$COMPLETION_DIR/_hatch"
 
 # https://golangci-lint.run/welcome/integrations/#shell-completion
-"$HOMEBREW_BIN/golangci-lint" completion zsh > "$COMPLETION_DIR/_golangci-lint"
+"$GOLANG_BIN/golangci-lint" completion zsh > "$COMPLETION_DIR/_golangci-lint"
