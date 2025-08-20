@@ -32,20 +32,34 @@ get_latest_patch() {
   ' | sort -V | tail -n1
 }
 
-# Iterate over installed versions
+# Build associative array of unique minor versions and their latest installed patch
+declare -A minor_to_latest_installed
 for version in "${installed_versions[@]}"; do
   minor_version=$(get_minor_version "$version")
-  latest_patch=$(get_latest_patch "$minor_version")
 
-  if [[ -z "$latest_patch" ]]; then
+  # If this minor version isn't in our array yet, or this version is newer than what we have
+  if [[ -z "${minor_to_latest_installed[$minor_version]}" ]] || \
+     [[ "$(printf '%s\n' "$version" "${minor_to_latest_installed[$minor_version]}" | sort -V | tail -n1)" == "$version" ]]; then
+    minor_to_latest_installed[$minor_version]="$version"
+  fi
+done
+
+echo "📋 Found ${#minor_to_latest_installed[@]} unique minor version(s): ${(k)minor_to_latest_installed[@]}"
+
+# Iterate over unique minor versions
+for minor_version in "${(@k)minor_to_latest_installed}"; do
+  installed_latest="${minor_to_latest_installed[$minor_version]}"
+  available_latest=$(get_latest_patch "$minor_version")
+
+  if [[ -z "$available_latest" ]]; then
     echo "⚠️ Could not determine the latest patch version for Python $minor_version."
     continue
   fi
 
-  if [[ "$version" == "$latest_patch" ]]; then
-    echo "✅ Python $version is up to date."
+  if [[ "$installed_latest" == "$available_latest" ]]; then
+    echo "✅ Python $minor_version is up to date ($installed_latest)."
   else
-    echo "⬆️ Updating Python $minor_version to latest patch $latest_patch..."
+    echo "⬆️ Updating Python $minor_version from $installed_latest to latest patch $available_latest..."
     uv python install "$minor_version" --reinstall
   fi
 done
