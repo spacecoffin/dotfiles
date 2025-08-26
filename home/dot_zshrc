@@ -136,6 +136,8 @@ export GPG_TTY="$TTY"
 
 # Golang
 export GOPATH="$GOPATH"
+export GOROOT="$GOROOT"
+export GOBIN="$GOBIN"
 
 # Java
 JAVA_HOME_CMD=/usr/libexec/java_home
@@ -322,8 +324,8 @@ alias rge='grep_env'
 # Open configs in Sublime Text
 alias zshrc='subl $HOME/.zshrc'
 alias uvtoml='subl $HOME/.config/uv/uv.toml'
+alias codeset='code "$HOME/Library/Application Support/Code/User/settings.json"'
 alias sqlfluff-conf='subl $HOME/.sqlfluff'
-# Jupyter Lab
 alias jlset='subl $HOME/.jupyter/lab/user-settings/@jupyter-lsp/jupyterlab-lsp/plugin.jupyterlab-settings'
 
 # zsh
