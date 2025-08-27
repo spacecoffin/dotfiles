@@ -80,7 +80,6 @@ z4h source "$HOME/.cargo/env"
 
 CARGO_BIN_PATH="$HOME/.cargo/bin"
 GOPATH="$HOME/.go"
-GOROOT="$GOPATH"
 GOBIN="$GOPATH/bin"
 COURSIER_BIN_PATH="$HOME/Library/Application Support/Coursier/bin"
 KREW_BIN_PATH="${KREW_ROOT:-$HOME/.krew}/bin"
@@ -136,7 +135,6 @@ export GPG_TTY="$TTY"
 
 # Golang
 export GOPATH="$GOPATH"
-export GOROOT="$GOROOT"
 export GOBIN="$GOBIN"
 
 # Java
