@@ -83,10 +83,10 @@ GOPATH="$HOME/.go"
 GOBIN="$GOPATH/bin"
 COURSIER_BIN_PATH="$HOME/Library/Application Support/Coursier/bin"
 KREW_BIN_PATH="${KREW_ROOT:-$HOME/.krew}/bin"
-DEVCONTAINER_CLI_BIN_PATH="$HOME/Library/Application Support/Code/User/globalStorage/ms-vscode-remote.remote-containers/cli-bin"
+# DEVCONTAINER_CLI_BIN_PATH="$HOME/Library/Application Support/Code/User/globalStorage/ms-vscode-remote.remote-containers/cli-bin"
 # 20240806: Python client needs libmysqlclient.23.dylib.
 # mysql-client 9.0.1 includes libmysqlclient.24.dylib.
-MYSQL_CLIENT_BIN_PATH=$HOMEBREW_PREFIX/opt/mysql-client@8.0/bin
+# MYSQL_CLIENT_BIN_PATH=$HOMEBREW_PREFIX/opt/mysql-client@8.0/bin
 
 path=(
   $py_bin_paths
@@ -95,8 +95,8 @@ path=(
   $GOBIN
   $COURSIER_BIN_PATH
   $KREW_BIN_PATH
-  $DEVCONTAINER_CLI_BIN_PATH
-  $MYSQL_CLIENT_BIN_PATH
+  # $DEVCONTAINER_CLI_BIN_PATH
+  # $MYSQL_CLIENT_BIN_PATH
 )
 
 # causes Brewed coreutils to be seen before pre-installed utils
@@ -345,8 +345,9 @@ alias db='databricks'
 
 # Kubernetes / kubectl
 # This is a kubectl wrapper encouraged by the Koddi Platform team.
+alias k='kubectl'
 if [[ -f "$HOME/.scripts/kubectl-wrapper/kubectl" ]]; then
-  alias k="$HOME/.scripts/kubectl-wrapper/kubectl"
+  alias kw="$HOME/.scripts/kubectl-wrapper/kubectl"
 fi
 
 # du
