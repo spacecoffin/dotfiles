@@ -319,6 +319,9 @@ alias pfpath='echo -e ${FPATH//:/\\n}'  # line separated FPATH
 alias rga='grep_alias'
 alias rge='grep_env'
 
+# Custom scripts
+alias set-diff-lines='$SCRIPTS_DIR/set-diff-lines.py'
+
 # Open configs in Sublime Text
 alias zshrc='subl $HOME/.zshrc'
 alias uvtoml='subl $HOME/.config/uv/uv.toml'
