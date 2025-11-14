@@ -7,8 +7,19 @@ if ! command -v uv &>/dev/null; then
 fi
 
 echo "🔍 Retrieving installed Python versions..."
-# Get list of installed Python versions
-installed_versions=($(uv python list --only-installed | awk '{print $1}'))
+# Get list of installed Python versions with freethreaded designation
+installed_versions=($(uv python list --only-installed | awk '{
+  if ($1 ~ /\+freethreaded/) {
+    # Extract version and add "t" suffix for freethreaded
+    gsub(/cpython-/, "", $1)
+    gsub(/\+freethreaded.*/, "t", $1)
+  } else {
+    # Extract standard version
+    gsub(/cpython-/, "", $1)
+    gsub(/-.*/, "", $1)
+  }
+  print $1
+}'))
 
 if [[ ${#installed_versions[@]} -eq 0 ]]; then
   echo "⚠️ No uv-managed Python versions found."
@@ -17,19 +28,48 @@ fi
 
 echo "✅ Found ${#installed_versions[@]} installed Python version(s)."
 
-# Function to extract major.minor from a version string
+# Function to extract major.minor from a version string, preserving freethreaded designation
 get_minor_version() {
-  echo "$1" | cut -d. -f1,2
+  local version="$1"
+  if [[ "$version" == *"t" ]]; then
+    # Freethreaded version - remove 't' suffix, extract major.minor, add 't' back
+    echo "${version%t}" | cut -d. -f1,2 | sed 's/$/t/'
+  else
+    # Standard version
+    echo "$version" | cut -d. -f1,2
+  fi
 }
 
 # Function to get the latest available patch version for a given minor version
 get_latest_patch() {
   local minor="$1"
-  uv python list --all-versions | awk -v minor="$minor" '
-    $1 ~ "^"minor"\\." {
-      print $1
-    }
-  ' | sort -V | tail -n1
+  local is_freethreaded=false
+  
+  if [[ "$minor" == *"t" ]]; then
+    is_freethreaded=true
+    # Remove 't' suffix for pattern matching
+    minor="${minor%t}"
+  fi
+  
+  if [[ "$is_freethreaded" == "true" ]]; then
+    # Get freethreaded versions
+    uv python list --all-versions | awk -v minor="$minor" '
+      $1 ~ "cpython-"minor"\\..*\\+freethreaded" {
+        gsub(/cpython-/, "", $1)
+        gsub(/\+freethreaded.*/, "t", $1)
+        print $1
+      }
+    ' | sort -V | tail -n1
+  else
+    # Get standard versions (exclude freethreaded)
+    uv python list --all-versions | awk -v minor="$minor" '
+      $1 ~ "cpython-"minor"\\." && $1 !~ "\\+freethreaded" {
+        gsub(/cpython-/, "", $1)
+        gsub(/-.*/, "", $1)
+        print $1
+      }
+    ' | sort -V | tail -n1
+  fi
 }
 
 # Build associative array of unique minor versions and their latest installed patch
@@ -60,6 +100,14 @@ for minor_version in "${(@k)minor_to_latest_installed}"; do
     echo "✅ Python $minor_version is up to date ($installed_latest)."
   else
     echo "⬆️ Updating Python $minor_version from $installed_latest to latest patch $available_latest..."
-    uv python install "$minor_version" --reinstall
+    # Determine the correct installation target
+    if [[ "$minor_version" == *"t" ]]; then
+      # Install freethreaded version
+      local install_target="${minor_version%t}+freethreaded"
+    else
+      # Install standard version
+      local install_target="$minor_version"
+    fi
+    uv python install "$install_target" --reinstall
   fi
 done
