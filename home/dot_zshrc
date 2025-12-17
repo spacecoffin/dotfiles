@@ -70,7 +70,7 @@ z4h init || return
 # uv installed Python
 UV_PYTHON_DIR=$(uv python dir)
 py_bin_paths=()
-py_vers=($(uv python list --only-installed --output-format=json | dasel --read=json --write=- 'all().key'))
+py_vers=($(uv python list --only-installed --output-format=json | dasel -i json -o json '..key'))
 for py_ver in $py_vers; do
   py_bin_paths+=("$UV_PYTHON_DIR/$py_ver/bin")
 done
