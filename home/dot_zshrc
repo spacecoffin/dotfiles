@@ -320,6 +320,7 @@ alias rga='grep_alias'
 alias rge='grep_env'
 
 # Custom scripts
+alias print-obsidian-plugins='$SCRIPTS_DIR/print_obsidian_plugins.py'
 alias set-diff-lines='$SCRIPTS_DIR/set-diff-lines.py'
 
 # Open configs in Sublime Text
