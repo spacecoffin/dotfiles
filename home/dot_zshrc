@@ -210,6 +210,10 @@ function upgrade() {
     brew update && brew upgrade
   fi
 
+  if [[ -x "$SCRIPTS_DIR/update_ngc_cli.sh" ]]; then
+    "$SCRIPTS_DIR/update_ngc_cli.sh"
+  fi
+
   if command -v uv &>/dev/null; then
     uv self update
     "$SCRIPTS_DIR/update_uv_python.zsh"
@@ -237,8 +241,8 @@ function upgrade() {
     kubectl krew upgrade
   fi
 
-  if [[ -x "$SCRIPTS_DIR/update_ngc_cli.sh" ]]; then
-    "$SCRIPTS_DIR/update_ngc_cli.sh"
+  if command -v claude &>/dev/null; then
+	claude update
   fi
 
   if [[ -x "$SCRIPTS_DIR/update_zsh_completions.sh" ]]; then
