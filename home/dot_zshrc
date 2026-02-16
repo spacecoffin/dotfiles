@@ -67,14 +67,6 @@ z4h init || return
 #                                 Extend PATH                                  #
 ################################################################################
 
-# uv installed Python
-UV_PYTHON_DIR=$(uv python dir)
-py_bin_paths=()
-py_vers=($(uv python list --only-installed --output-format=json | dasel -i json -o json '..key'))
-for py_ver in $py_vers; do
-  py_bin_paths+=("$UV_PYTHON_DIR/$py_ver/bin")
-done
-
 # rustup
 z4h source "$HOME/.cargo/env"
 
@@ -89,7 +81,6 @@ KREW_BIN_PATH="${KREW_ROOT:-$HOME/.krew}/bin"
 # MYSQL_CLIENT_BIN_PATH=$HOMEBREW_PREFIX/opt/mysql-client@8.0/bin
 
 path=(
-  $py_bin_paths
   $path
   $CARGO_BIN_PATH
   $GOBIN
