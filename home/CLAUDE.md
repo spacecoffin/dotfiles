@@ -54,3 +54,7 @@ forces an interactive shell with full alias support.
 - I like clean, modern tooling and well-organized configurations.
 - When suggesting shell commands, prefer the modern tool over the classic equivalent.
 - Don't over-explain things I already know — I'm comfortable with my tools.
+
+## Koddi Context
+
+@~/.claude/koddi-context.md
