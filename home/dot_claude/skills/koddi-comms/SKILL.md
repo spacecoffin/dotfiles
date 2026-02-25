@@ -113,6 +113,29 @@ After gathering, reconcile across sources:
 
 ---
 
+## Slack Output Format
+
+Apply these rules when rendering any update for Slack.
+
+**Emoji**: Use Slack emoji codes, not Unicode. `:large_green_circle:` not 🟢, `:warning:` not ⚠️, `:trident:` not 🔱, etc.
+
+**Title line**: Plain text flanked by the relevant emoji — no markdown bold or italic.
+```
+:trident: Triton Project Update :trident:
+```
+
+**Date**: Plain text on its own line directly below the title. No formatting.
+
+**Section headers**: Bold using `*Header*`. E.g., `*Status by Workstream*`, `*Next Milestone*`.
+
+**Sub-points within a bullet**: Use line breaks only when it meaningfully aids readability — e.g., 3+ sub-items that would be unwieldy on one line. Otherwise keep on one line with semicolons.
+
+**Footer**: Plain parentheses — `(details in thread)`. No italic, no formatting.
+
+**No leading spaces** on any line.
+
+---
+
 ## Step 1: Clarify Audience
 
 If not specified, ask: **"Who's the audience for this update?"**
