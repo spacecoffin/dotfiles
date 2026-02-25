@@ -79,6 +79,7 @@ KREW_BIN_PATH="${KREW_ROOT:-$HOME/.krew}/bin"
 # 20240806: Python client needs libmysqlclient.23.dylib.
 # mysql-client 9.0.1 includes libmysqlclient.24.dylib.
 # MYSQL_CLIENT_BIN_PATH=$HOMEBREW_PREFIX/opt/mysql-client@8.0/bin
+SCRIPTS_DIR="$HOME/.scripts"
 
 path=(
   $path
@@ -88,6 +89,7 @@ path=(
   $KREW_BIN_PATH
   # $DEVCONTAINER_CLI_BIN_PATH
   # $MYSQL_CLIENT_BIN_PATH
+  $SCRIPTS_DIR
 )
 
 # causes Brewed coreutils to be seen before pre-installed utils
@@ -189,8 +191,6 @@ autoload -Uz zmv
 ################################################################################
 #                       Define functions and completions                       #
 ################################################################################
-
-SCRIPTS_DIR="$HOME/.scripts"
 
 # function md() { [[ $# == 1 ]] && mkdir -p -- "$1" && cd -- "$1" }
 # compdef _directories md
@@ -345,8 +345,8 @@ alias db='databricks'
 # Kubernetes / kubectl
 # This is a kubectl wrapper encouraged by the Koddi Platform team.
 alias k='kubectl'
-if [[ -f "$HOME/.scripts/kubectl-wrapper/kubectl" ]]; then
-  alias kw="$HOME/.scripts/kubectl-wrapper/kubectl"
+if [[ -f "$SCRIPTS_DIR/kubectl-wrapper/kubectl" ]]; then
+  alias kw="$SCRIPTS_DIR/kubectl-wrapper/kubectl"
 fi
 
 # du
